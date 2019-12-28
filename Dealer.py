@@ -8,7 +8,6 @@ class Dealer:
          'King': ({'Number in Deck': 4}, {'Value': 10}),
          'Jack': ({'Number in Deck': 4}, {'Value': 10}),
          'Queen': ({'Number in Deck': 4}, {'Value': 10}),
-         'One': ({'Number in Deck': 4}, {'Value': 1}),
          'Two': ({'Number in Deck': 4}, {'Value': 2}),
          'Three': ({'Number in Deck': 4}, {'Value': 3}),
          'Four': ({'Number in Deck': 4}, {'Value': 4}),
@@ -22,14 +21,8 @@ class Dealer:
     minimum_players = 2
 
     def __init__(self, players):
-        if len(players) > self.max_players or len(players) > self.minimum_players:
-            print('Maximum or minimum number of players exceeded,'
-                  ' only max {} or min {} allowed.'.format(self.max_players, self.minimum_players))
-            self.num_players = self.max_players
-            self.players = players[:self.max_players]
-        else:
-            self.num_players = len(players)
-            self.players = players
+        self.num_players = len(players)
+        self.players = players
 
     def deal_cards(self):
         for i in range(2):
@@ -39,6 +32,9 @@ class Dealer:
                 card_value = self.deck_of_cards[card_key][1]['Value']
                 card = {card_key: card_value}
                 player.hit(card)
+        for player in self.players:
+            print('Player {} initial hand'.format(player.player_name))
+            player.show_hand()
         pass
 
     def hit_player(self, player):
@@ -64,24 +60,25 @@ class Dealer:
         if self.all_stayed():
             max_hand = 0
             for player in self.players:
-                if player.current_total > max_hand:
+                if max_hand < player.current_total <= 21:
                     winners.clear()
                     winners.append(player)
+                    max_hand = player.current_total
                 elif player.current_total == max_hand:
                     winners.append(player)
             has_winner = True
+        elif len(self.players) is 1:
+            winners.append(self.players[0])
+            has_winner = True
         else:
             for player in self.players:
-                if player.current_total > 21:
-                    player.show_hand()
-                    print('Player {} is eliminated, better luck next time.'.format(player.player_name))
-                    self.players.remove(player)
                 if player.current_total == 21:
                     has_winner = True
                     winners.append(player)
         if has_winner is True:
             if len(winners) == 1:
-                print(winners[0].show_hand())
+                player = winners[0]
+                print(player.show_hand())
                 print('Player {} has won the game! Thank you for playing.'.format(player.player_name))
             else:
                 print('The game is a draw between players...')
@@ -91,5 +88,8 @@ class Dealer:
                 print('Thank you for playing!')
         return has_winner
 
+    def disqualify_player(self, player):
+        print('Player {} is eliminated, better luck next time.'.format(player.player_name))
+        self.players.remove(player)
 
 pass

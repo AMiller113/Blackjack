@@ -10,7 +10,15 @@ def setup():
         num_of_players = input('That was not a valid number. '
                                'Please enter the number of '
                                'players in this game (maximum {})'.format(Dealer.max_players))
+
     num_of_players = int(num_of_players)
+    if num_of_players > Dealer.max_players or num_of_players < Dealer.minimum_players:
+        if num_of_players > Dealer.max_players:
+            print('Number of players exceeds maximum, setting player count to max.')
+            num_of_players = Dealer.max_players
+        else:
+            print('Number of players below minimum, setting player count to minimum.')
+            num_of_players = Dealer.minimum_players
     players = []
     for i in range(num_of_players):
         players.append(Player())
@@ -23,6 +31,7 @@ def main_loop(dealer):
     game_over = dealer.game_status()
     while game_over is False:
         for player in dealer.players:
+            print('Player {}\'s turn'.format(player.player_name))
             player.show_hand()
             while not player.has_stayed:
                 move = input('Player {}, hit or stay?\n'.format(player.player_name))
@@ -32,11 +41,12 @@ def main_loop(dealer):
                     move.lower()
                 if move == 'hit':
                     dealer.hit_player(player)
-                    player.show_hand()
                     if player.current_total > 21:
-                        break
+                        player.stay()
                 else:
                     player.stay()
+            if player.current_total > 21:
+                dealer.disqualify_player(player)
             has_winner = dealer.game_status()
             if has_winner is True:
                 game_over = True
